@@ -3,12 +3,18 @@ session_start();
 include("functions.php");
 check_session_id();
 
+// ユーザ名取得
+$user_id = $_SESSION['id'];
+
 // DB接続
 $pdo = connect_to_db();
 
-// データ取得SQL作成
-$sql = 'SELECT * FROM todo_table';
+// いいね数カウント
 
+
+// データ取得SQL作成
+$sql = 'SELECT * FROM todo_table LEFT OUTER JOIN (SELECT todo_id, COUNT(id) AS cnt FROM like_table GROUP BY todo_id) AS likes ON todo_table.id = likes.todo_id';
+// $sql = 'SELECT todo_id, COUNT(id) AS cnt FROM like_table GROUP BY todo_id';
 // SQL準備&実行
 $stmt = $pdo->prepare($sql);
 $status = $stmt->execute();
@@ -27,13 +33,14 @@ if ($status == false) {
   // <tr><td>deadline</td><td>todo</td><tr>の形になるようにforeachで順番に$outputへデータを追加
   // `.=`は後ろに文字列を追加する，の意味
   foreach ($result as $record) {
-    $output .= "<tr>";
-    $output .= "<td>{$record["deadline"]}</td>";
-    $output .= "<td>{$record["todo"]}</td>";
-    // edit deleteリンクを追加
-    $output .= "<td><a href='todo_edit.php?id={$record["id"]}'>edit</a></td>";
-    $output .= "<td><a href='todo_delete.php?id={$record["id"]}'>delete</a></td>";
-    $output .= "</tr>";
+    $output .= "<div class='date'>{$record["deadline"]}</div>";
+    $output .= "<div class='text'>{$record["todo"]}</div>";
+    // like edit deleteリンクを追加
+    $output .= "<div class='twitter__block-text'>";
+    $output .= "<span class='twitter-heart'><a href='like_create.php?user_id={$user_id}&todo_id={$record["id"]}'>like{$record["cnt"]}</a></span>";
+    $output .= "<span class='twitter-bubble'><a href='todo_edit.php?id={$record["id"]}'>edit</a></span>";
+    $output .= "<span class='twitter-loop'><a href='todo_delete.php?id={$record["id"]}'>delete</a></span>";
+    $output .= "</div>";
   }
   // $valueの参照を解除する．解除しないと，再度foreachした場合に最初からループしない
   // 今回は以降foreachしないので影響なし
@@ -41,50 +48,47 @@ if ($status == false) {
 }
 ?>
 
-<!DOCTYPE html>
 <html lang="ja">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <!-- Font Awesome https://fontawesome.com/start -->
-  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
-  <!-- Bootstrap https://getbootstrap.com/docs/4.3/getting-started/introduction/ -->
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-  <link rel="stylesheet" href="style.css">
-  <title>todo list</title>
+  <meta charset="UTF-8" />
+  <title>twitter風チャット画面(会話方式)を記事に表示する方法</title>
+  <link rel='stylesheet' href='style.css' type='text/css' media='all' />
 </head>
 
 <body>
 
-  <section class="container">
-    <header class="text-center text-light my-4">
-      <h1 class="mb-4">todo list</h1>
-      <a href="todo_input.php">todo input</a>
-    </header>
-
-    <table>
-      <thead>
-        <tr>
-          <th>deadline</th>
-          <th>todo</th>
-          <th></th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- ここに<tr><td>deadline</td><td>todo</td><tr>の形でデータが入る -->
-        <?= $output ?>
-      </tbody>
-    </table>
-
-    <div class="text-center text-light my-4">
-      <a href="todo_logout.php">logout</a>
+  <!-- ▼twitter風ここから -->
+  <div class="twitter__container">
+    <!-- タイトル -->
+    <div class="twitter__title">
+      <span class="twitter-logo"></span>
     </div>
 
-  </section>
+    <a href="todo_input.php">todo input</a>
 
+    <!-- ▼タイムラインエリア scrollを外すと高さ固定解除 -->
+    <div class="twitter__contents scroll">
+
+      <!-- 記事エリア -->
+      <div class="twitter__block">
+        <figure>
+          <img src="icon.jpg" />
+        </figure>
+        <div class="twitter__block-text">
+          <div class="name">ダレイオス</div>
+          <div class="date"></div>
+          <div class="text"></div>
+          <div class="twitter__icon"><?= $output ?></div>
+        </div>
+      </div>
+
+      <a href="todo_logout.php">logout</a>
+
+    </div>
+    <!--　▲タイムラインエリア ここまで -->
+  </div>
+  <!--　▲twitter風ここまで -->
 
 </body>
 

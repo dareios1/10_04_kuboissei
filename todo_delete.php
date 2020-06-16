@@ -5,6 +5,7 @@
 // exit();
 // 関数ファイルの読み込み
 include("functions.php");
+check_session_id();
 
 // 送信データ受け取り
 $id = $_GET["id"];

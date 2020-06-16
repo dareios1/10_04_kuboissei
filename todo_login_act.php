@@ -1,16 +1,18 @@
 <?php
-
 // var_dump($_POST);
 // exit();
 session_start(); //セッションの開始
+
 // 外部ファイル読み込み
 include('functions.php'); //関数ファイル読み込み
-check_session_id();
+
 // DB接続します
 $pdo = connect_to_db(); //DB接続
+
 // データ受け取り→変数に入れる
 $user_id = $_POST['user_id']; 
 $password = $_POST['password'];
+
 // データ取得SQL作成&実行
 $sql = 'SELECT * FROM users_table WHERE user_id=:user_id AND password=:password AND is_deleted=0';
 $stmt = $pdo->prepare($sql);
@@ -38,6 +40,7 @@ if (!$val) {
   $_SESSION["session_id"] = session_id();
   $_SESSION["is_admin"] = $val["is_admin"];
   $_SESSION["user_id"] = $val["user_id"];
+  $_SESSION["id"] = $val["id"];
   header("Location:todo_read.php"); //一覧ページへ移動
   exit();
 }

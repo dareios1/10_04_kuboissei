@@ -2,9 +2,11 @@
 // 送信データのチェック
 // var_dump($_GET);
 // exit();
+session_start();
 
 // 関数ファイルの読み込み
 include("functions.php");
+check_session_id();
 
 $id = $_GET["id"];
 

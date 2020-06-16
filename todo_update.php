@@ -5,7 +5,9 @@
 // exit();
 
 // 関数ファイルの読み込み
+session_start();
 include("functions.php");
+check_session_id();
 
 // 送信データ受け取り
 $todo = $_POST["todo"];

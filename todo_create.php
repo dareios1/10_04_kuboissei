@@ -1,9 +1,11 @@
 <?php
-include("functions.php");
 
 // 送信確認
 // var_dump($_POST);
 // exit();
+session_start();
+include("functions.php");
+check_session_id();
 
 // 項目入力のチェック
 // 値が存在しないor空で送信されてきた場合はNGにする
